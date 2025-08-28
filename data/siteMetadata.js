@@ -3,7 +3,7 @@ const siteMetadata = {
   title: 'Research Decoded',
   author: 'Roshini',
   headerTitle: 'Research Decoded',
-  description: 'Research, simplified. The latest in cybersecurity and cryptography, made easy to understand',
+  description: 'Exploring security, cryptography, and tech through simple reflections.',
   language: 'en-us',
   theme: 'system', // system, dark or light
   siteUrl: 'https://researchdecoded.vercel.app',
