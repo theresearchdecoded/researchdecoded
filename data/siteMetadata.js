@@ -6,7 +6,7 @@ const siteMetadata = {
   description: 'Exploring security, cryptography, and tech through simple reflections.',
   language: 'en-us',
   theme: 'system', // system, dark or light
-  siteUrl: 'https://www.researchdecoded.vercel.app',
+  siteUrl: 'https://researchdecoded.vercel.app',
   siteRepo: 'https://github.com/roshr22/researchdecoded',
   siteLogo: `${process.env.BASE_PATH || ''}/static/images/logo.png`,
   //socialBanner: `${process.env.BASE_PATH || ''}/static/images/twitter-card.png`,
