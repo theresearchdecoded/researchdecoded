@@ -4,10 +4,6 @@ import siteMetadata from '@/data/siteMetadata'
 
 export const dynamic = 'force-static'
 
-function formatDate(date: string | Date): string {
-  return new Date(date).toISOString().split('T')[0] // → "2025-08-29"
-}
-
 export default function sitemap(): MetadataRoute.Sitemap {
   const siteUrl = siteMetadata.siteUrl
 
@@ -15,12 +11,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     .filter((post) => !post.draft)
     .map((post) => ({
       url: `${siteUrl}/${post.path}`,
-      lastModified: formatDate(post.lastmod || post.date),
+      lastModified: new Date(post.lastmod || post.date).toISOString(),
     }))
 
-  const routes = ['', 'blog'].map((route) => ({
-    url: `${siteUrl}/${route}`,
-    lastModified: formatDate(new Date()),
+  const routes = ['/', '/blog'].map((route) => ({
+    url: `${siteUrl}${route}`,
+    lastModified: new Date().toISOString(),
   }))
 
   return [...routes, ...blogRoutes]
