@@ -51,9 +51,6 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
-  verification: {
-    google: '-xxcdQbv17-MoUWSMPTYzlpN8yvAieljiKhnlWMs0dQ',
-  },
   // twitter: {
   //   title: siteMetadata.title,
   //   card: 'summary_large_image',
