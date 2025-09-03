@@ -188,18 +188,17 @@ There are 2 types:
    Note that the boolean formula is a monotone, meaning that only AND and OR are allowed. NOT is not allowed.
 
 2. **Ciphertext-Policy ABE:**
-   This is just the reverse of key policy ABE. Here, the index is the boolean function, i.e. $ind = \phi$ and the key carries the vector z. Everything else is exactly the same.
+   This is just the reverse of Key-Policy ABE. Here, the index is the boolean function, i.e., $\text{ind} = \phi$, and the key carries the vector $z$. Everything else is exactly the same.
 
-   We can describe this system for the predicate $P_n: K \times I \rightarrow \{0,1\} where:
+   We can describe this system for the predicate $P_n: K \times I \to \{0,1\}$, where:
 
-   1. The key space $K := {0, 1}^n$ is the set of all n bit strings representing n boolean variables $z = (z_1, …, z_n) \in {0, 1}^n.
-   2. The plaintext, (ind = \phi, m), where the index space I is the set of all poly-sized boolean formulas \phi over n variables.
-   3. The predicate $P_n on K \times I$ is defined as
-
-   $$
-   P_n(z \in K \backslash \{\epsilon\}, ind = \phi \in I) := 
-   \begin(cases)
-	   1 & \text{if } \phi(z) = 1
-	   0 & \text{otherwise}
-   \end(cases)
-   $$
+   1.  The key space $K := \{0, 1\}^n$ is the set of all $n$-bit strings, representing $n$ boolean variables $z = (z_1, \dots, z_n) \in \{0, 1\}^n$.
+   2.  The plaintext is a pair $(\text{ind} = \phi, m)$, where the index space $I$ is the set of all poly-sized boolean formulas $\phi$ over $n$ variables.
+   3.  The predicate $P_n$ on $K \times I$ is defined as:
+    $$
+    P_n(z \in K, \text{ind} = \phi \in I) :=
+    \begin{cases}
+      1 & \text{if } \phi(z) = 1 \\
+      0 & \text{otherwise}
+    \end{cases}
+    $$
