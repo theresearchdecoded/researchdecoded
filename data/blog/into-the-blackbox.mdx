@@ -46,10 +46,10 @@ A functionality F defined over (K, X) is a function $F : K \times X \to \{0, 1\}
 
 A functional encryption scheme (FE) for a functionality F defined over (K, X) is a tuple of four PPT algorithms (setup, keygen, enc, dec) satisfying the following correctness condition for all k &isin; K and x &isin; X:
 
-1. **Generate a public and master secret key pair:** (pp, mk) $\leftarrow$ setup(1<sup>λ</sup>) 
-2. **Generate secret key for k:** sk $\leftarrow$ keygen(mk, k) 
-3. **Encrypt message x:** c $\leftarrow$ enc(pp, x) 
-4. **Use sk to compute F(k, x) from c:** y $\leftarrow$ dec(sk, c) 
+1. **Generate a public and master secret key pair:** $(pp, mk) \leftarrow setup(1^λ)$
+2. **Generate secret key for k:** $sk \leftarrow keygen(mk, k) $
+3. **Encrypt message x:** $c \leftarrow enc(pp, x) $
+4. **Use sk to compute F(k, x) from c:** $y \leftarrow dec(sk, c) $
 
 then we require that y = F(k, x) with probability 1.
 
@@ -108,7 +108,9 @@ In this case, we will get the decrypted message as m. But, if ind = “Bob”, w
 
 A variation to this is predicate encryption with public index, where instead of keeping the index secret, we reveal it to the user as a publicly known value. In fact, it is explicitly sent with the ciphertext. 
 
-$$F(\epsilon, (ind, m)) = (ind, len(m))$$
+$$
+F(\epsilon, (\text{ind}, m)) = (\text{ind}, \text{len}(m))
+$$
 
 One question you might have here is, “Why should index be publicly known? Isn't it a security risk?”
 
@@ -143,7 +145,9 @@ While decrypting, Alice provides her secret key along with the ciphertext. At th
 
 It is an identity based encryption, except that here, the index is kept private. Hence, the only thing leaked is the length of the message. 
 
-$$F(\epsilon, (ind, m)) = len(m)$$
+$$
+F(\epsilon, (ind, m)) = len(m)
+$$
 
 #### Attribute Based Encryption 
 
