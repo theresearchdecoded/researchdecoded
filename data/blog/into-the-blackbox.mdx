@@ -3,180 +3,99 @@ title: 'Functional Encryption 101: Into the Black Box'
 date: '2025-09-03'
 tags: ['functional encryption', 'cryptography', 'cybersecurity']
 draft: false
-summary: "A deep dive into functional encryption through the black box lens explaining how it enables secure computations on encrypted data."
+summary: "A deep dive into functional encryption through the black box lens, explaining how it enables secure computations on encrypted data."
 ---
 
-Functional encryption can often feel like stepping into a dense forest of symbols, equations and abstract definitions. When I first started going through the paper, “Functional Encryption: Definitions and Challenges” by Dan Boneh, Amit Sahai and Brent Waters, I felt like the paper was in a language that was just beyond my reach. If you have ever felt that way, this paper is for you. 
+Functional encryption can often feel like stepping into a dense forest of symbols, equations, and abstract definitions. When I first started reading the paper, “Functional Encryption: Definitions and Challenges” by Dan Boneh, Amit Sahai, and Brent Waters, I felt it was written in a language just beyond my reach. If you've ever felt that way, this post is for you.
 
-This blog is meant to be like a guided tour where we will walk through the paper together, unpacking the notations, highlighting the big ideas and delving deeper where things get tricky. Whether you are new to functional encryption or just need a quick refresher, this is for you. 
+This blog is a guided tour where we'll walk through the paper together, unpacking the notation, highlighting the big ideas, and delving deeper where things get tricky. Whether you're new to functional encryption or just need a refresher, you're in the right place.
 
 Let’s get started!
 
-## Introduction into the Formal Language and Syntax Used
-In the last post, we covered the basics of Functional Encryption - if you’re new, start there first: link.
+## Introduction to Formal Language and Syntax
 
-Section 1 of “Functional Encryption: Definitions and Challenges” outlines the history and motivation, which I recommend skimming for context. Here, we’ll dive into the formal language and syntax used in the paper, breaking down notation and definitions to make them easier to follow.
+In the last post, we covered the basics of Functional Encryption. If you’re new, [start there first](./path-to-your-previous-post).
 
-Let’s first understand what algorithms govern a functional encryption scheme.
+Section 1 of the paper outlines the history and motivation, which I recommend skimming for context. Here, we’ll dive into the formal language, breaking down the notation and definitions to make them easier to follow.
 
-1. Setup: This involves generating the public key (referred to as the public parameters) and the master key. As we know, the public parameters (pp) are shared information available to everyone, while the master key (mk) is available only to the owner of the information (called the trusted party)
-2. Key Generation (KeyGen): This involves generating the secret key (sk), which is tied only to a particular function. This key is the reason functional encryption works, i.e. being able to exact only a function of the data (and not decrypt the complete data).
-3. Encryption (Enc): This involves encrypting the data with the public parameters (pp), thus producing the ciphertext. It can be decrypted using the master key (by the trusted party) and using the secret key (by the key holder or functional user). 
-4. Decryption (Dec): This involves decryption the ciphertext with the secret key (sk), to produce the function of the data (y).
+A functional encryption scheme is governed by four core algorithms:
 
-There are also a couple of terms used in definitions, which I have explained below:
+1.  **Setup**: Generates the public key (public parameters, `pp`) and the master key (`mk`). The public key is available to everyone, while the master key is kept secret by the trusted party.
+2.  **KeyGen (Key Generation)**: Uses the master key to generate a secret key (`sk`) tied to a particular function. This is the magic of FE—it allows a user to extract the result of a specific function on the data without decrypting the data itself.
+3.  **Enc (Encryption)**: Encrypts the data with the public parameters (`pp`) to produce a ciphertext.
+4.  **Dec (Decryption)**: Uses a secret key (`sk`) on the ciphertext to produce the function's output (`y`).
 
-1. Key Space (K): It is the set of all valid keys for a particular scheme.
-2. Plaintext Space (X): It is the set of all valid plaintext values for a particular scheme.
-3. Security parameter (λ): It controls how hard the scheme is to break. It is usually denoted by 1^λ, which basically means the maximum length is 1^λ. This is done to avoid the confusion that λ itself is the maximum length.
-4. Deterministic Turing Machine: It is a theoretical computational model that is predictable - when given a particular input, it always produces the same output in the same number of steps. This means that when a scheme can be represented by a deterministic Turing machine, it is precise. We won’t be covering Turing machines here as it is a vast topic that would need its own post.
-5. Probabilistic Polynomial Time Algorithm (PPT): There are two parts to this: Probabilistic and Polynomial Time. Probabilistic means that the algorithm uses randomness to make decisions. For example, flipping a coin to make a decision. Polynomial time means that even if the input size increases, the algorithm will still be able to complete in a reasonable amount of time (not infinitely running).
-6.Empty key (ε): IT is just a non-existent key. It is often used to denote the case of what the ciphertext itself leaked about the plaintext. 
-6. Now that we have a basic grasp of the language and notation, let’s dive into the key ideas introduced in the paper.
+### Decoding the Jargon
 
-### Definition 1:
-A functionality F defined over (K, X) is a function F : K x X → {0, 1} described as a (deterministic) Turing Machine. The set K is called the key space and the set X is called the plaintext space. We require that the key space K contain a special key called the empty key denoted.
+Here are a few key terms used in the formal definitions:
 
-### Definition 2:
-A functional encryption scheme (FE) for a functionality F defined over (K, X) is a tuple of four PPT algorithms (setup, keygen, enc, dec) satisfying the following correctness condition for all k $ K and x $ X:
+1.  **Key Space (`K`)**: The set of all valid keys for a scheme.
+2.  **Plaintext Space (`X`)**: The set of all valid plaintext values.
+3.  **Security Parameter (`λ`)**: A parameter that controls how hard the scheme is to break. It's often written as `$1^\lambda$` in academic papers, a formal way to ensure the system's security and runtime scale properly.
+4.  **Deterministic Turing Machine**: A theoretical computational model that is predictable—a given input always produces the same output. Stating that a function is a Turing machine is a formal way of saying it's a well-defined computation.
+5.  **Probabilistic Polynomial Time (PPT) Algorithm**: This means the algorithms are both efficient and secure. "Probabilistic" means they use randomness (essential for security), and "Polynomial Time" means they run in a reasonable amount of time.
+6.  **Empty Key (`ε`)**: A special non-existent key, often used to analyze what information the ciphertext leaks by itself.
 
-1. (pp, mk) ← setup(1^λ) (generate a public and master secret key pair)
-2. sk ← keygen(mk, k) (generate secret key for k)
-3. c ← enc(pp, x) (encrypt message x)
-4. y ← dec(sk, c) (use sk to compute F(k, x) from c) 
-then we require that y = F(k, x) with probability 1.
+### Formal Definitions
 
-These are the functions that are stated in the paper and hopefully, these make sense now. 
+> **Definition 1: Functionality**
+> A functionality `F` defined over `(K, X)` is a function `$F : K \times X \to \{0, 1\}^*$` described as a (deterministic) Turing Machine. The set `K` is the key space and `X` is the plaintext space. We require that `K` contain a special key called the empty key, denoted `ε`.
 
-If we now apply this to public key encryption (which we discussed in the last blog), 
+> **Definition 2: Functional Encryption Scheme**
+> An FE scheme for a functionality `F` is a tuple of four PPT algorithms `(Setup, KeyGen, Enc, Dec)` satisfying the following correctness condition for all `$k \in K$` and `$x \in X$`:
+> 1.  `(pp, mk)` $\leftarrow$ `Setup(`$1^\lambda$`)`
+> 2.  `sk` $\leftarrow$ `KeyGen(mk, k)`
+> 3.  `c` $\leftarrow$ `Enc(pp, x)`
+> 4.  `y` $\leftarrow$ `Dec(sk, c)`
+>
+> We require that `y = F(k, x)` with probability 1.
 
-Let K := {1, $} and consider the following functionality F defined over (K, X) for some plaintext space X: 
+The last part of this section discusses **parameterization**. While we've treated `K` and `X` as fixed, they often depend on the `Setup` algorithm. For example, in RSA, `Setup` returns a modulus `N`, and the keys and plaintexts are defined over `$Z_N$`. So, `Setup` doesn't just create keys; it also defines the environment they operate in.
 
-F(k,x) := x if k = 1 
-    len(x) if k = $
+## Classes of Functional Encryption
 
-As we know, there is no logic of functions in the general public key encryption scheme. So, we are just considering two cases, k = 1 when the message gets decrypted and k = $, which represents the case of all incorrect keys, when only length of the decrypted message is revealed, nothing more. 
+Now that we understand the building blocks, it’s time to zoom out. Functional Encryption isn’t a single scheme. Depending on what kind of functions the keys can compute, FE branches into different classes.
 
-The last part in this section speaks about parameterisation. Till now, we treated K and X as fixed spaces. But, it often depends on additional information that we derive from Setup. The paper talks of one such example of RSA, where setup returns N (the RSA modulus) and now, K and X are defined on ZN (instead of Z). (Note: ZN means set of all integers that can be produced by modulo N). Hence, setup doesn’t just give keys. It also decides what the valid keys and plaintexts look like.
+### Predicate Encryption
 
-## Classes and Sub-classes of Functional Encryption:
-Now that we understand the basic building blocks of Functional Encryption, it’s time to zoom out a little. Functional Encryption isn’t one single scheme. Depending on what kind of functions the keys can compute, FE branches into different classes and sub-classes. Some allow simple checks, others handle complex computations. In this section, we’ll look at the main classes introduced in the paper and how they differ.
+Predicate encryption is a major class of FE where the function is a yes/no question (a **predicate**). The plaintext is a pair, `(ind, m)` $\in$ `$I \times M$`, where `ind` is a descriptive label (the index) and `m` is the message. The secret key is tied to a predicate `P`.
 
-## Predicate Encryption
-Predicate encryption is a class of functional encryption where the function is a yes/no question (called a predicate). Unlike regular encryption techniques where the plaintext is only m, here it is a pair, (ind, m) $ I x M. ind (index) refers to the label describing the message, which is used to decide if a secret key should work on the ciphertext and m is the message itself. The key is generated by tying a predicate value to it, which decides whether the ciphertext with a given index should be deciphered or not. 
+-   If `P(ind) = 1` (the predicate is true for the index), decryption succeeds and reveals `m`.
+-   If `P(ind) = 0` (the predicate is false), decryption fails and reveals nothing about `m`.
 
-If P(k,ind)=1, i.e. the predicate matches the index, decryption succeeds and reveals the message m. Else if P(k,ind)=0, i.e. the predicate and the index don't match, decryption fails and reveals nothing about m.
+A common variation is **Predicate Encryption with Public Index**, where `ind` is revealed publicly. This is a trade-off: hiding the index is computationally expensive, so revealing it is acceptable in scenarios like searching encrypted data where efficiency is paramount.
 
-Let's look at an example
+Depending on the predicate, this class is divided into further sub-classes:
 
-Suppose we have ind = “Alice” and some message m. Let us assume that our predicate key is “Is the sender = “Alice”?”.
+#### Identity-Based Encryption (IBE)
 
-In this case, we will get the decrypted message as m. But, if ind = “Bob”, we would learn nothing about m.
+The predicate is a simple equality test. The index `ind` is an identity (e.g., an email address), and a key works only if it was generated for that exact identity. **Anonymous IBE** is a variant where the index is kept private.
 
-A small variation to this is predicate encryption with public index. 
+#### Attribute-Based Encryption (ABE)
 
-Here, instead of keeping the index secret, we reveal it to the user as a publicly known value. In fact, it is explicitly sent with the ciphertext. 
+Here, the predicate is a complex access policy based on attributes.
 
-One question you might have here is, “Why should index be publicly known? Isn't it a security risk?”
+* **Key-Policy ABE (KP-ABE)**: The ciphertext is tagged with attributes (e.g., `{'role': 'doctor', 'dept': 'cardiology'}`). The secret key contains an access policy (e.g., `'doctor' AND 'cardiology'`). The key works only if the ciphertext's attributes satisfy the policy.
+* **Ciphertext-Policy ABE (CP-ABE)**: The reverse of KP-ABE. The ciphertext is encrypted with a policy, and the secret key contains attributes.
 
-The reason for revealing the index is done as a trade-off. Hidden index value can often lead to heavy cryptographic operations. This is unnecessary in case of operations like sorting, searching, etc., where the goal is to perform these operations on encrypted data and not necessarily focused on finding the right index value. So, it's considered a reasonable trade-off for higher efficiency. 
+> **How is this secure?** The security relies on the trusted **Private Key Generator (PKG)**. It will only issue a secret key containing attributes that a user legitimately possesses. You can't forge attributes to get a key you aren't entitled to.
 
-It's also important to note here that although the index value is leaked, it isn't possible to decrypt data using this information. The only thing we learn is, for example, the identity of the sender. Nothing more. 
+#### Hidden Vector Encryption (HVE)
 
-Depending on the type of predicate, we can further divide this into distinct sub-classes. Let’s examine each in detail.
+The index is a vector of attributes, and the secret key checks for a specific pattern in that vector (wildcards are allowed). This enables fine-grained searches, like conjunctive queries, without revealing the attribute values.
 
-### Identity Based Encryption 
-Here, the predicate is an equality test to verify the identity of the ciphertext.
+#### Inner Product Encryption (IPE)
 
-We exclude epsilon here because it doesn't make sense to have the index as epsilon.
+This is a powerful, general form of predicate encryption. The ciphertext is associated with a vector `x`, and the secret key with a vector `y`. Decryption succeeds only if the **inner product** of these vectors is zero (`$x \cdot y = 0$`).
 
-Let’s take an example to understand this better. 
+This simple condition can express complex policies. To ensure the math works cleanly, these schemes are defined over a **finite field** (`$F_p$`), where `p` is a prime number. In a field, every non-zero element has a multiplicative inverse, which makes the mathematics both elegant and powerful.
 
-Assume ind = “Alice” for a given message m and together they make the plaintext = (“Alice”, m). The sender, Bob, encrypts the plaintext using pp and sends the ciphertext to Alice. Alice authenticates herself by generating a secret key sk = keygen(msk, “Alice”) using the private key generator (PKG). While decrypting, Alice provides her secret key along with the ciphertext. At this moment, Alice’s identity is verified to make sure that she is the rightful receiver of the message and the decrypted message is outputted. 
-
-### Anonymous Identity Based Encryption
-It is an identity based encryption, except that here, the index is kept private. Hence, the only thing leaked is the length of the message. 
-
-### Attribute Based Encryption 
-Here, the predicate is a complex access policy which is used to determine if the access can be granted. 
-
-There are 2 types:
-#### Key policy ABE: 
-In very simple terms, consider a vector z = (z1, z2, z3, …, zn). This vector is the index, which along with the message forms the plaintext pair, (ind = z, m). The key on the other hand carries the formula. When both the key and index are put together and evaluated, if the output is 1, access is granted and the message can be decrypted. Else, access denied and the message can’t be decrypted. 
-
-Let’s take an example to visualise it.
-
-Let’s assume three characteristics that help me identify the receiver, Alice:
-
-1. Is she a student?
-2. Does she study Cryptography?
-3. Is she a faculty?
-
-The answer to these questions forms my vector z, and hence the value of index, which let’s assume in this case corresponds to (1, 1, 0). When Alice frames the boolean formula, she is sure that she can satisfy both being a student and that she studies cryptography and hence it looks like this: z Student ​∧ z Cryptography. Now, if you substitute the value of the vector into the formula, you get 1, meaning access granted. And hence the  decryption is successful. Suppose, Alice was a faculty, this would clearly fail.
-
-Now, one question you might have here is if the index is publicly known and if the receiver requests for the secret key from the PKG by giving the boolean formula as input, then how is this scheme secure? Because in that case, I could look at the value of the index and generate the boolean formula and hence get the perfect secret key that will grant access.
-
-Here is a slight subtlety that is important to understand. The receiver doesn’t get the encrypted data and hence the value of the index until they generate the secret key from the PKG. And the receiver can only generate the secret key once. Now the scheme is secure, isn’t it?
-
-Back to the math/notations, 
-
-The same can also be applied using strings instead of bit vectors. 
-
-Note that the boolean formula is a monotone, meaning that only AND and OR are allowed. NOT is not allowed.
-
-#### Ciphertext-Policy ABE: 
-This is just the reverse of key policy ABE. Here, the index is the boolean function, i.e. ind = Φ and the key carries the vector z. Everything else is exactly the same.
-
-#### Hidden Vector Encryption
-Here, the key essentially checks if the index follows a particular pattern and that becomes the basis for granting access. For the plaintext pair, we have the index represented as a vector and the message itself, i.e. plaintext = (ind = (w1, w2, …, wn), m). The key resembles a regex like format to pattern match the index. If the pattern matches, access is granted. This gives more flexibility in how the index should look and makes writing the rule a lot easier.
-
-Since ind is hidden here, only the length of the message is revealed. 
-
-Hidden vector encryption enables fine-grained searches, such as conjunctive queries and range queries, without revealing the underlying attribute values.
-
-#### Inner Product Predicate
-To understand inner product predicate, we first need to understand what ring and field means and how they are different, and to understand that, we need to understand additive and multiplicative inverse. So, let’s start from that.
-
-Additive inverse in cryptography is almost the same as what it means in math, but with a small twist. 
-
-Remember we learnt the idea of Zn while defining the definition of functional encryption. We will bring that back here. So, anytime we want to calculate the additive inverse of any number, we say we want the additive inverse of that number in Zn. It would be easier to explain this with an example. 
-
-Let’s consider Z5. Z5 contains possible results of mod 5, which means
-					Z5 = {0, 1, 2, 3, 4}
-
-Suppose, we have to find the additive inverse of 1. According to the definition, I need to find the value, which when added to 1 gives 0, which is -1 in math. However, there is one small issue: Subtraction and division are invalid operations in cryptography, which means negative numbers are out of the question. But, lucky for us, mod comes to save the day.
-
-In cryptography, we modify the definition of additive inverse as:
-					(x + y) mod 5 = 0
-
-Using this new definition, the additive inverse of 1 over Zn becomes 4 as (1+4) mod 5 = 0.
-
-Similarly, the new definition of multiplicative inverse becomes:
-					(x . y) mod 5 = 1
-
-But, one issue with multiplicative inverse is that not all integers in Zn may have a multiplicative inverse.
-
-Let’s consider Z8. 
-					Z8 = {0, 1, 2, 3, 4, 5, 6, 7}
-
-Here, 2 doesn’t have a multiplicative inverse as product mod 8 never gives 1.
-
-With this information, we can now define a ring and a field. Ring means that the additive and multiplicative inverse may not be in Zn. Field means that the additive and multiplicative inverse must be in Zn.
-
-Initially the inner product predicate was defined over a ring Zn. But, given that additive and multiplicative inverses may or may not exist, it complicates proofs. Hence, we define it over a Fp, where p is a prime number (mod prime is always a field). 
-
-The idea of inner product predicate is simple. We set up a dot product expression to evaluate any function we need to compute. This allows us to perform complex evaluations like disjunction, CNF (Conjunctive Normal Form), DNF (Disjunctive Normal Form), polynomial, etc. Both the key and the index here are vectors and access is granted if their dot product gives the result as 0. 
-
-#### Other systems
-By using a combination of systems, we can make new systems. Some examples are:
-1. Attribute-Based Encryption and Broadcast Encryption 
-2. Identity-Based Broadcast Encryption 
-3. Broadcast HIBE
-4. Inner-Product Encryption and ABE
+---
 
 ## Conclusion
-Through this blog, we moved beyond the simple “dot product” view and uncovered the bigger picture of functional encryption and its subclasses. What began as a small, simple idea has now taken shape into a clear, well-defined concept.
 
-If this post felt heavier or denser than the last one, that’s completely natural - you are encountering a lot of notation and theory for the first time. But I hope that as we went along, the pieces started clicking into place and felt easier to grasp.
+Through this blog, we moved beyond a simple view and uncovered the bigger picture of functional encryption and its subclasses. What began as a small idea has now taken shape into a clear, well-defined concept.
 
-And remember, this isn’t the finish line. The real question still lingers: are these encryption schemes truly secure? That’s the mystery we’ll unravel next - in our deep dive into security definitions.
+If this post felt denser than the last one, that’s completely natural—you're encountering a lot of notation and theory for the first time. I hope that as we went along, the pieces started clicking into place.
+
+And remember, this isn’t the finish line. The real question still lingers: are these encryption schemes truly secure? That’s the mystery we’ll unravel next in our deep dive into security definitions.
