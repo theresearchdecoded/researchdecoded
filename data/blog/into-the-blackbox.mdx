@@ -135,9 +135,9 @@ We exclude $\epsilon$ here because it doesn't make sense to have the index as $\
 
 Let’s take an example to understand this better. 
 
-Assume ind = “Alice” for a given message m and together they make the plaintext = (“Alice”, m). 
+Assume ind = “Alice” for a given message m and together they make the plaintext = (“Alice”, m). The sender, Bob, encrypts the plaintext using pp and sends the ciphertext to Alice. Alice authenticates herself by generating a secret key sk = keygen(msk, “Alice”) using the private key generator (PKG). 
 
-The sender, Bob, encrypts the plaintext using pp and sends the ciphertext to Alice. Alice authenticates herself by generating a secret key sk = keygen(msk, “Alice”) using the private key generator (PKG). While decrypting, Alice provides her secret key along with the ciphertext. At this moment, Alice’s identity is verified to make sure that she is the rightful receiver of the message and the decrypted message is outputted. 
+While decrypting, Alice provides her secret key along with the ciphertext. At this moment, Alice’s identity is verified to make sure that she is the rightful receiver of the message and the decrypted message is outputted. 
 
 #### Anonymous Identity Based Encryption
 
@@ -145,31 +145,44 @@ It is an identity based encryption, except that here, the index is kept private.
 
 $$F(\epsilon, (ind, m)) = len(m)$$
 
-#### Attribute-Based Encryption (ABE)
+#### Attribute Based Encryption 
 
-Here, the predicate is a complex access policy based on attributes.
+Here, the predicate is a complex access policy which is used to determine if the access can be granted. 
 
-* **Key-Policy ABE (KP-ABE)**: The ciphertext is tagged with attributes (e.g., `{'role': 'doctor', 'dept': 'cardiology'}`). The secret key contains an access policy (e.g., `'doctor' AND 'cardiology'`). The key works only if the ciphertext's attributes satisfy the policy.
-* **Ciphertext-Policy ABE (CP-ABE)**: The reverse of KP-ABE. The ciphertext is encrypted with a policy, and the secret key contains attributes.
+There are 2 types:
 
-> **How is this secure?** The security relies on the trusted **Private Key Generator (PKG)**. It will only issue a secret key containing attributes that a user legitimately possesses. You can't forge attributes to get a key you aren't entitled to.
+1. **Key policy ABE:** 
 
-#### Hidden Vector Encryption (HVE)
+In very simple terms, consider a vector $z = (z_1, z_2, z_3, …, z_n)$. This vector is the index, which along with the message forms the plaintext pair, (ind = z, m). The key on the other hand carries the formula. When both the key and index are put together and evaluated, if the output is 1, access is granted and the message can be decrypted. Else, access denied and the message can’t be decrypted. 
 
-The index is a vector of attributes, and the secret key checks for a specific pattern in that vector (wildcards are allowed). This enables fine-grained searches, like conjunctive queries, without revealing the attribute values.
+Let’s take an example to visualise it.
 
-#### Inner Product Encryption (IPE)
+Let’s assume three characteristics that help me identify the receiver, Alice:
 
-This is a powerful, general form of predicate encryption. The ciphertext is associated with a vector `x`, and the secret key with a vector `y`. Decryption succeeds only if the **inner product** of these vectors is zero (`$x \cdot y = 0$`).
+1. Is she a student?
+2. Does she study Cryptography?
+3. Is she a faculty?
 
-This simple condition can express complex policies. To ensure the math works cleanly, these schemes are defined over a **finite field** (`$F_p$`), where `p` is a prime number. In a field, every non-zero element has a multiplicative inverse, which makes the mathematics both elegant and powerful.
+The answer to these questions forms my vector z, and hence the value of index, which let’s assume in this case corresponds to (1, 1, 0). When Alice frames the boolean formula, she is sure that she can satisfy both being a student and that she studies cryptography and hence it looks like this: z_Student ​∧ z_Cryptography. Now, if you substitute the value of the vector into the formula, you get 1, meaning access granted. And hence the  decryption is successful. Suppose, Alice was a faculty, this would clearly fail.
 
----
+Now, one question you might have here is if the index is publicly known and if the receiver requests for the secret key from the PKG by giving the boolean formula as input, then how is this scheme secure? Because in that case, I could look at the value of the index and generate the boolean formula and hence get the perfect secret key that will grant access.
 
-## Conclusion
+Here is a slight subtlety that is important to understand. The receiver doesn’t get the encrypted data and hence the value of the index until they generate the secret key from the PKG. And the receiver can only generate the secret key once. Now the scheme is secure, isn’t it?
 
-Through this blog, we moved beyond a simple view and uncovered the bigger picture of functional encryption and its subclasses. What began as a small idea has now taken shape into a clear, well-defined concept.
+We can describe this system for the predicate $P_n: K \times I \rightarrow \{0,1\} where:
 
-If this post felt denser than the last one, that’s completely natural—you're encountering a lot of notation and theory for the first time. I hope that as we went along, the pieces started clicking into place.
+1. The key space K is the set of all poly-sized boolean formulas \phi in n variables $z = (z_1, …, z_n) \in {0, 1}^n. Let \phi(z) be the formula \phi at z.
+2. The plaintext, (ind = z, m), where $I := {0, 1}^n$ and z is a bit vector representing boolean values a_2, …, z_n.
+3. The predicate $P_n on K \times I$ is defined as
 
-And remember, this isn’t the finish line. The real question still lingers: are these encryption schemes truly secure? That’s the mystery we’ll unravel next in our deep dive into security definitions.
+$$
+P_n(\phi \in K \backslash \{\epsilon\}, ind = z \in I) := 
+\begin(cases)
+	1 & \text{if } \phi(z) = 1
+	0 & \text{otherwise}
+\end(cases)
+$$
+
+The same can also be applied using strings instead of bit vectors. 
+
+Note that the boolean formula is a monotone, meaning that only AND and OR are allowed. NOT is not allowed.
