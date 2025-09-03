@@ -87,6 +87,7 @@ In this section, we’ll look at the main classes introduced in the paper and ho
 Predicate encryption is a class of functional encryption where the function is a yes/no question (called a predicate). 
 
 Unlike regular encryption techniques where m is the plaintext, here the plaintext exists as a pair, (ind, m) ∈ I x M. The index (ind) refers to the label describing the message, which is used to decide if a secret key should work on the ciphertext and m refers to the message. The key is tied to a predicate, P, which decides whether the ciphertext with a given index should be deciphered or not. 
+
 If P(k,ind)=1, i.e. the predicate matches the index, decryption succeeds and reveals the message m. If P(k,ind)=0, i.e. the predicate and the index don't match, decryption fails and reveals nothing about m.
 
 Thus, this FE scheme can be defined as a polynomial-time predicate $P : K \times I \to \{0, 1\}$. The FE functionality over $(K \cup \{\epsilon\}, (I \times M))$ is defined as
@@ -94,8 +95,8 @@ Thus, this FE scheme can be defined as a polynomial-time predicate $P : K \times
 $$
 F(k \in K, (ind, m) \in X) := 
 \begin{cases}
-	m & \text{if} P(k, ind) = 1 \\
-	\perp & \text{if} P(k, ind) = 0
+	m & \text{if } P(k, ind) = 1 \\
+	\perp & \text{if } P(k, ind) = 0
 \end{cases}
 $$
 
@@ -107,7 +108,7 @@ In this case, we will get the decrypted message as m. But, if ind = “Bob”, w
 
 A variation to this is predicate encryption with public index, where instead of keeping the index secret, we reveal it to the user as a publicly known value. In fact, it is explicitly sent with the ciphertext. 
 
-$$ F(\epsilon, (ind, m)) = (ind, len(m)) $$
+$$F(\epsilon, (ind, m)) = (ind, len(m))$$
 
 One question you might have here is, “Why should index be publicly known? Isn't it a security risk?”
 
@@ -121,20 +122,22 @@ Depending on the type of predicate, we can further divide this into distinct sub
 
 Here, the predicate is an equality test to verify the identity of the ciphertext.
 
-For key space $K := \{0, 1\}* \cup \{\epsilon\}$ and plaintext pair (ind, m), where index space $I := \{0,1}*, the predicate P on $K \times I$ is defined as
+For key space $K := \{0, 1\}^* \cup \{\epsilon\}$ and a plaintext pair (ind, m), where the index space is $I := \{0, 1\}^*$, the predicate P on $K \times I$ is defined as:
 $$
-P(k \in K \backslash \{\epsilon\}, ind \in I) := 
+P(k \in K \backslash \{\epsilon\}, ind \in I) :=
 \begin{cases}
-	1 & \text{if} k = ind and \\
-	2 & \text{otherwise}
+	1 & \text{if } k = ind \\
+	0 & \text{otherwise}
 \end{cases}
 $$
 
-We exclude $\epsilon$ here because it doesn't make sense to have the index as$\epsilon$.
+We exclude $\epsilon$ here because it doesn't make sense to have the index as $\epsilon$.
 
 Let’s take an example to understand this better. 
 
-Assume ind = “Alice” for a given message m and together they make the plaintext = (“Alice”, m). The sender, Bob, encrypts the plaintext using pp and sends the ciphertext to Alice. Alice authenticates herself by generating a secret key sk = keygen(msk, “Alice”) using the private key generator (PKG). While decrypting, Alice provides her secret key along with the ciphertext. At this moment, Alice’s identity is verified to make sure that she is the rightful receiver of the message and the decrypted message is outputted. 
+Assume ind = “Alice” for a given message m and together they make the plaintext = (“Alice”, m). 
+
+The sender, Bob, encrypts the plaintext using pp and sends the ciphertext to Alice. Alice authenticates herself by generating a secret key sk = keygen(msk, “Alice”) using the private key generator (PKG). While decrypting, Alice provides her secret key along with the ciphertext. At this moment, Alice’s identity is verified to make sure that she is the rightful receiver of the message and the decrypted message is outputted. 
 
 #### Anonymous Identity Based Encryption
 
