@@ -153,52 +153,53 @@ There are 2 types:
 
 1. **Key policy ABE:** 
 
-In very simple terms, consider a vector $z = (z_1, z_2, z_3, …, z_n)$. This vector is the index, which along with the message forms the plaintext pair, (ind = z, m). The key on the other hand carries the formula. When both the key and index are put together and evaluated, if the output is 1, access is granted and the message can be decrypted. Else, access denied and the message can’t be decrypted. 
+   In very simple terms, consider a vector $z = (z_1, z_2, z_3, …, z_n)$. This vector is the index, which along with the message forms the plaintext pair, (ind = z, m). The key on the other hand carries the formula. When both the key and index are put together and evaluated, if the output is 1, access is granted and the message can be decrypted. Else, access denied and the message can’t be decrypted. 
 
-Let’s take an example to visualise it.
+   Let’s take an example to visualise it.
 
-Let’s assume three characteristics that help me identify the receiver, Alice:
+   Let’s assume three characteristics that help me identify the receiver, Alice:
 
-1. Is she a student?
-2. Does she study Cryptography?
-3. Is she a faculty?
+   1. Is she a student?
+   2. Does she study Cryptography?
+   3. Is she a faculty?
 
-The answer to these questions forms my vector z, and hence the value of index, which let’s assume in this case corresponds to (1, 1, 0). When Alice frames the boolean formula, she is sure that she can satisfy both being a student and that she studies cryptography and hence it looks like this: z_Student ​∧ z_Cryptography. Now, if you substitute the value of the vector into the formula, you get 1, meaning access granted. And hence the  decryption is successful. Suppose, Alice was a faculty, this would clearly fail.
+   The answer to these questions forms my vector z, and hence the value of index, which let’s assume in this case corresponds to (1, 1, 0). When Alice frames the boolean formula, she is sure that she can satisfy both being a student and that she studies cryptography and hence it looks like this: z_Student ​∧ z_Cryptography. Now, if you substitute the value of the vector into the formula, you get 1, meaning access granted. And hence the  decryption is successful. Suppose, Alice was a faculty, this would clearly fail.
 
-Now, one question you might have here is if the index is publicly known and if the receiver requests for the secret key from the PKG by giving the boolean formula as input, then how is this scheme secure? Because in that case, I could look at the value of the index and generate the boolean formula and hence get the perfect secret key that will grant access.
+   Now, one question you might have here is if the index is publicly known and if the receiver requests for the secret key from the PKG by giving the boolean formula as input, then how is this scheme secure? Because in that case, I could look at the value of the index and generate the boolean formula and hence get the perfect secret key that will grant access.
 
-Here is a slight subtlety that is important to understand. The receiver doesn’t get the encrypted data and hence the value of the index until they generate the secret key from the PKG. And the receiver can only generate the secret key once. Now the scheme is secure, isn’t it?
+   Here is a slight subtlety that is important to understand. The receiver doesn’t get the encrypted data and hence the value of the index until they generate the secret key from the PKG. And the receiver can only generate the secret key once. Now the scheme is secure, isn’t it?
 
-We can describe this system for the predicate $P_n: K \times I \to \{0,1\}$, where:
+   We can describe this system for the predicate $P_n: K \times I \to \{0,1\}$, where:
 
-1.  The key space $K$ is the set of all poly-sized boolean formulas $\phi$ in $n$ variables $z = (z_1, \dots, z_n) \in \{0, 1\}^n$. Let $\phi(z)$ be the evaluation of the formula $\phi$ at input $z$.
-2.  The plaintext is a pair $(\text{ind} = z, m)$, where the index space is $I := \{0, 1\}^n$ and $z$ is a bit vector $(z_1, \dots, z_n)$.
-3.  The predicate $P_n$ on $K \times I$ is defined as:
-    $$
-    P_n(\phi \in K, \text{ind} = z \in I) :=
-    \begin{cases}
+   1.  The key space $K$ is the set of all poly-sized boolean formulas $\phi$ in $n$ variables $z = (z_1, \dots, z_n) \in \{0, 1\}^n$. Let $\phi(z)$ be the evaluation of the formula $\phi$ at input $z$.
+   2.  The plaintext is a pair $(\text{ind} = z, m)$, where the index space is $I := \{0, 1\}^n$ and $z$ is a bit vector $(z_1, \dots, z_n)$.
+   3.  The predicate $P_n$ on $K \times I$ is defined as:
+    
+   $$
+   P_n(\phi \in K, \text{ind} = z \in I) :=
+   \begin{cases}
     	1 & \text{if } \phi(z) = 1 \\
     	0 & \text{otherwise}
-    \end{cases}
-    $$
+   \end{cases}
+   $$
 
-The same can also be applied using strings instead of bit vectors. 
+   The same can also be applied using strings instead of bit vectors. 
 
-Note that the boolean formula is a monotone, meaning that only AND and OR are allowed. NOT is not allowed.
+   Note that the boolean formula is a monotone, meaning that only AND and OR are allowed. NOT is not allowed.
 
 2. **Ciphertext-Policy ABE:**
-This is just the reverse of key policy ABE. Here, the index is the boolean function, i.e. $ind = \phi$ and the key carries the vector z. Everything else is exactly the same.
+   This is just the reverse of key policy ABE. Here, the index is the boolean function, i.e. $ind = \phi$ and the key carries the vector z. Everything else is exactly the same.
 
-We can describe this system for the predicate $P_n: K \times I \rightarrow \{0,1\} where:
+   We can describe this system for the predicate $P_n: K \times I \rightarrow \{0,1\} where:
 
-1. The key space $K := {0, 1}^n$ is the set of all n bit strings representing n boolean variables $z = (z_1, …, z_n) \in {0, 1}^n.
-2. The plaintext, (ind = \phi, m), where the index space I is the set of all poly-sized boolean formulas \phi over n variables.
-3. The predicate $P_n on K \times I$ is defined as
+   1. The key space $K := {0, 1}^n$ is the set of all n bit strings representing n boolean variables $z = (z_1, …, z_n) \in {0, 1}^n.
+   2. The plaintext, (ind = \phi, m), where the index space I is the set of all poly-sized boolean formulas \phi over n variables.
+   3. The predicate $P_n on K \times I$ is defined as
 
-$$
-P_n(z \in K \backslash \{\epsilon\}, ind = \phi \in I) := 
-\begin(cases)
-	1 & \text{if } \phi(z) = 1
-	0 & \text{otherwise}
-\end(cases)
-$$
+   $$
+   P_n(z \in K \backslash \{\epsilon\}, ind = \phi \in I) := 
+   \begin(cases)
+	   1 & \text{if } \phi(z) = 1
+	   0 & \text{otherwise}
+   \end(cases)
+   $$
