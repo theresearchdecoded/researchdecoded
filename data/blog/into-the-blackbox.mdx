@@ -206,61 +206,44 @@ There are 2 types:
 
 #### Hidden Vector Encryption
 
-Here, the key essentially checks if the index follows a particular pattern and that becomes the basis for granting access. For the plaintext pair, we have the index represented as a vector and the message itself, i.e. plaintext = (ind = (w_1, w_2, …, w_n), m). The key resembles a regex-like format to pattern match the index. If the pattern matches, access is granted. This gives more flexibility in how the index should look and makes writing the rule a lot easier.
+Here, the key essentially checks if the index follows a particular pattern, which becomes the basis for granting access. For the plaintext pair, we have the index represented as a vector and the message itself, i.e., $\text{plaintext} = (\text{ind} = (w_1, \dots, w_n), m)$. The key resembles a regex-like format to pattern-match the index. If the pattern matches, access is granted. This gives more flexibility in how the index should look and makes writing the rule a lot easier.
 
-In this system, a ciphertext has a vector of $n$ elements in $\{0, 1\}^*$, and a private key consists of a vector of $n$ elements in $\{*\} \cup \{0, 1\}^*$, where `*` is a wildcard character. The key space is $K = (v_1, \dots, v_n)$, where each $v_i \in \{*\} \cup \{0, 1\}^*$. The plaintext is a pair $(\text{ind} = (w_1, \dots, w_n), m)$, where each $w_i \in \{0, 1\}^*$ and the index space is $I := (\{0, 1\}^*)^n$.Then, the predicate $P_n on K \times I$ is defined as
-
-$$ P_n\left( (v_1, \dots, v_n) \in K \backslash \{\epsilon\}, \text{ind} = (w_1, \dots, w_n) \right) := \begin{cases} 	1 & \text{if } v_i = w_i \text{ whenever } v_i \neq * \\ 	0 & \text{otherwise} \end{cases} $$
-
-Since ind is hidden here, only the length of the message is revealed. 
+In this system, a ciphertext has a vector of $n$ elements in $\{0, 1\}^*$, and a private key consists of a vector of $n$ elements in $\{*\} \cup \{0, 1\}^*$, where `*` is a wildcard character. The key space is $K = (v_1, \dots, v_n)$, where each $v_i \in \{*\} \cup \{0, 1\}^*$. The plaintext is a pair $(\text{ind} = (w_1, \dots, w_n), m)$, where each $w_i \in \{0, 1\}^*$ and the index space is $I := (\{0, 1\}^*)^n$. Then, the predicate $P_n$ on $K \times I$ is defined as:
+$$
+P_n\left( (v_1, \dots, v_n) \in K \backslash \{\epsilon\}, \text{ind} = (w_1, \dots, w_n) \right) :=
+\begin{cases}
+	1 & \text{if } v_i = w_i \text{ whenever } v_i \neq * \\
+	0 & \text{otherwise}
+\end{cases}
+$$
+Since `ind` is hidden here, only the length of the message is revealed.
 
 Hidden vector encryption enables fine-grained searches, such as conjunctive queries and range queries, without revealing the underlying attribute values.
 
 #### Inner Product Predicate
 
-To understand inner product predicate, we first need to understand what ring and field means and how they are different, and to understand that, we need to understand additive and multiplicative inverse. So, let’s start from that.
+To understand the inner product predicate, we first need to understand what a "ring" and a "field" are and how they differ. To do that, we need to understand additive and multiplicative inverses in modular arithmetic.
 
-Additive inverse in cryptography is almost the same as what it means in math, but with a small twist. 
+Remember the idea of $Z_n$ from our definition of functional encryption? Let’s consider $Z_5$, which contains the possible results of modulo 5: $Z_5 = \{0, 1, 2, 3, 4\}$.
 
-Remember we learnt the idea of Zn while defining the definition of functional encryption. We will bring that back here. So, anytime we want to calculate the additive inverse of any number, we say we want the additive inverse of that number in Zn. It would be easier to explain this with an example. 
+The **additive inverse** of a number `x` is a number `y` such that `(x + y) mod n = 0`. For example, in $Z_5$, the additive inverse of 1 is 4, because $(1+4) \bmod 5 = 0$.
 
-Let’s consider Z5. Z5 contains possible results of mod 5, which means
-					Z5 = {0, 1, 2, 3, 4}
+Similarly, the **multiplicative inverse** is a number `y` such that `(x . y) mod n = 1`. However, not all numbers have a multiplicative inverse. In $Z_8 = \{0, 1, 2, 3, 4, 5, 6, 7\}$, the number 2 has no multiplicative inverse, as no product `(2 . y) mod 8` ever equals 1.
 
-Suppose, we have to find the additive inverse of 1. According to the definition, I need to find the value, which when added to 1 gives 0, which is -1 in math. However, there is one small issue: Subtraction and division are invalid operations in cryptography, which means negative numbers are out of the question. But, lucky for us, mod comes to save the day.
+This brings us to rings and fields:
+-   A **Ring** is a set like $Z_n$ where multiplicative inverses may not exist for all elements.
+-   A **Field** is a set like $F_p$ (where $p$ is a prime number) where every non-zero element *does* have a multiplicative inverse.
 
-In cryptography, we modify the definition of additive inverse as:
-					(x + y) mod 5 = 0
+Proofs are much simpler in fields. Hence, the inner product predicate is defined over a field $F_p$. The idea is simple: both the key and the index are vectors, and access is granted if their dot product is 0.
 
-Using this new definition, the additive inverse of 1 over Zn becomes 4 as (1+4) mod 5 = 0.
+The scheme is defined as:
 
-Similarly, the new definition of multiplicative inverse becomes:
-					(x . y) mod 5 = 1
-
-But, one issue with multiplicative inverse is that not all integers in Zn may have a multiplicative inverse.
-
-Let’s consider Z8. 
-					Z8 = {0, 1, 2, 3, 4, 5, 6, 7}
-
-Here, 2 doesn’t have a multiplicative inverse as product mod 8 never gives 1.
-
-With this information, we can now define a ring and a field. Ring means that the additive and multiplicative inverse may not be in Zn. Field means that the additive and multiplicative inverse must be in Zn.
-
-Initially the inner product predicate was defined over a ring Zn. But, given that additive and multiplicative inverses may or may not exist, it complicates proofs. Hence, we define it over a Fp, where p is a prime number (mod prime is always a field). 
-
-The idea of inner product predicate is simple. We set up a dot product expression to evaluate any function we need to compute. This allows us to perform complex evaluations like disjunction, CNF (Conjunctive Normal Form), DNF (Disjunctive Normal Form), polynomial, etc. Both the key and the index here are vectors and access is granted if their dot product gives the result as 0. 
-
-The scheme is written as:
-
-1. The setup algorithm defines a randomly chosen prime $p$ of length $\kappa$, where $\kappa$ is the security parameter.
-
-2. The key space $K$ is all $\vec{v} = (v_1, \dots, v_n)$ where each $v_i \in \mathbb{F}_p$.
-
-3. The plaintext is a pair $(\text{ind} = (w_1, \dots, w_n), m)$ where each $w_i \in \mathbb{F}_p$. The index space is $I := (\mathbb{F}_p)^n$.
-
-4. The predicate $P_{n,p}$ on $K \times I$ is defined as
+1.  The setup algorithm defines a randomly chosen prime $p$ of length $\kappa$, where $\kappa$ is the security parameter.
+2.  The key space $K$ is all $\vec{v} = (v_1, \dots, v_n)$ where each $v_i \in \mathbb{F}_p$.
+3.  The plaintext is a pair $(\text{ind} = (w_1, \dots, w_n), m)$ where each $w_i \in \mathbb{F}_p$. The index space is $I := (\mathbb{F}_p)^n$.
+4.  The predicate $P_{n,p}$ on $K \times I$ is defined as:
     $$
-    P_{n,p}\left( (v_1, \dots, v_n) \in K \backslash \{\epsilon\}, \text{ind} = (w_1, \dots, w_n) \right) :=
+    P_{n,p}\left( (v_1, \dots, v_n) \in K, \text{ind} = (w_1, \dots, w_n) \right) :=
     \begin{cases}
     	1 & \text{if } \sum_{i=1}^{n} v_i \cdot w_i = 0 \\
     	0 & \text{otherwise}
@@ -269,15 +252,15 @@ The scheme is written as:
 
 ### Other systems
 By using a combination of systems, we can make new systems. Some examples are:
-1. Attribute-Based Encryption and Broadcast Encryption 
-2. Identity-Based Broadcast Encryption 
+1. Attribute-Based Encryption and Broadcast Encryption
+2. Identity-Based Broadcast Encryption
 3. Broadcast HIBE
 4. Inner-Product Encryption and ABE
 
-##Conclusion
+## Conclusion
 
 Through this blog, we moved beyond the simple “dot product” view and uncovered the bigger picture of functional encryption and its subclasses. What began as a small, simple idea has now taken shape into a clear, well-defined concept.
 
-If this post felt heavier or denser than the last one, that’s completely natural - you are encountering a lot of notation and theory for the first time. But I hope that as we went along, the pieces started clicking into place and felt easier to grasp.
+If this post felt heavier or denser than the last one, that’s completely natural—you are encountering a lot of notation and theory for the first time. But I hope that as we went along, the pieces started clicking into place and felt easier to grasp.
 
-And remember, this isn’t the finish line. The real question still lingers: are these encryption schemes truly secure? That’s the mystery we’ll unravel next - in our deep dive into security definitions.
+And remember, this isn’t the finish line. The real question still lingers: are these encryption schemes truly secure? That’s the mystery we’ll unravel next in our deep dive into security definitions.
