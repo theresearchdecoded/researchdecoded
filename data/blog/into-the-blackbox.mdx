@@ -9,9 +9,11 @@ summary: "A deep dive into functional encryption through the black box lens, exp
 Functional encryption can often feel like stepping into a dense forest of symbols, equations and abstract definitions. When I first started going through the paper, “Functional Encryption: Definitions and Challenges” by Dan Boneh, Amit Sahai and Brent Waters, I felt like it was in a language that was just beyond my reach. If you have ever felt that way, this post is for you. 
 
 This blog is a guided tour where we will walk through the paper together, unpacking the notations, highlighting the big ideas and delving deeper where things get tricky. Whether you are new to functional encryption or just need a quick refresher, you are in the right place. 
+
 Let’s get started!
 
 ## Introduction into the Formal Language and Syntax Used
+
 In the last post, we covered the basics of Functional Encryption. If you are new, start [here](./functional-encryption-101).
 
 Section 1 of the paper outlines the history and motivation, which I recommend skimming for context. Here, we’ll dive into the formal language and syntax, breaking down the notation and definitions to make them easier to follow.
@@ -43,14 +45,18 @@ A functionality F defined over (K, X) is a function $F : K \times X \to \{0, 1\}
 ### Definition 2:
 
 A functional encryption scheme (FE) for a functionality F defined over (K, X) is a tuple of four PPT algorithms (setup, keygen, enc, dec) satisfying the following correctness condition for all k &isin; K and x &isin; X:
+
 1. **Generate a public and master secret key pair:** (pp, mk) $\leftarrow$ setup(1<sup>λ</sup>) 
 2. **Generate secret key for k:** sk $\leftarrow$ keygen(mk, k) 
 3. **Encrypt message x:** c $\leftarrow$ enc(pp, x) 
 4. **Use sk to compute F(k, x) from c:** y $\leftarrow$ dec(sk, c) 
+
 then we require that y = F(k, x) with probability 1.
 
-If we now apply this to public key encryption (which we discussed in the last blog), 
+If we now apply this to public key encryption (which we discussed in the last blog) 
+
 Let K := $\{1, \epsilon\}$ and consider the following functionality F defined over (K, X) for some plaintext space X: 
+
 $$
 F(k,x) :=
 \begin{cases}
@@ -60,26 +66,81 @@ F(k,x) :=
 $$
 
 As we know, there is no logic of functions in the general public key encryption scheme. So, we are just considering two cases, k = 1 when the message gets decrypted and k = $\epsilon$, where only length of the decrypted message is revealed, nothing more. 
-The last part in this section speaks about parameterisation. While we treated K and X as fixed spaces, they often depend on additional information from the Setup algorithm. For example, in RSA, Setup returns a modulus N, and the keys and plaintexts are defined over $Z_N$ (Note: $Z_N$ means a set of all integers that can be produced by modulo N). So, Setup doesn't just create keys. It also defines the environment they operate in.
 
-## Classes of Functional Encryption
+The last part in this section speaks about parameterisation. While we treated K and X as fixed spaces, they often depend on additional information from the Setup algorithm. For example, in RSA, Setup returns a modulus N, and the keys and plaintexts are defined over $Z_N$. So, Setup doesn't just create keys. It also defines the environment they operate in.
 
-Now that we understand the building blocks, it’s time to zoom out. Functional Encryption isn’t a single scheme. Depending on what kind of functions the keys can compute, FE branches into different classes.
+Note: $Z_N$ means a set of all integers that can be produced by modulo N
+
+## Classes and Sub-classes of Functional Encryption
+
+Now that we understand the basic building blocks of Functional Encryption, it’s time to zoom out a little. Functional Encryption isn’t one single scheme. Depending on what kind of functions the keys can compute, FE branches into different classes and sub-classes. Some allow simple checks, others handle complex computations. 
+
+In this section, we’ll look at the main classes introduced in the paper and how they differ.
+
+<div className="my-1 w-full overflow-hidden px-2">
+  <img alt="Functional Encryption Classification" src="/static/images/fe-classification.png" />
+</div>
+
 
 ### Predicate Encryption
 
-Predicate encryption is a major class of FE where the function is a yes/no question (a **predicate**). The plaintext is a pair, `(ind, m)` $\in$ `$I \times M$`, where `ind` is a descriptive label (the index) and `m` is the message. The secret key is tied to a predicate `P`.
+Predicate encryption is a class of functional encryption where the function is a yes/no question (called a predicate). 
 
--   If `P(ind) = 1` (the predicate is true for the index), decryption succeeds and reveals `m`.
--   If `P(ind) = 0` (the predicate is false), decryption fails and reveals nothing about `m`.
+Unlike regular encryption techniques where m is the plaintext, here the plaintext exists as a pair, (ind, m) ∈ I x M. The index (ind) refers to the label describing the message, which is used to decide if a secret key should work on the ciphertext and m refers to the message. The key is tied to a predicate, P, which decides whether the ciphertext with a given index should be deciphered or not. 
+If P(k,ind)=1, i.e. the predicate matches the index, decryption succeeds and reveals the message m. If P(k,ind)=0, i.e. the predicate and the index don't match, decryption fails and reveals nothing about m.
 
-A common variation is **Predicate Encryption with Public Index**, where `ind` is revealed publicly. This is a trade-off: hiding the index is computationally expensive, so revealing it is acceptable in scenarios like searching encrypted data where efficiency is paramount.
+Thus, this FE scheme can be defined as a polynomial-time predicate $P : K \times I \to \{0, 1\}$. The FE functionality over $(K \cup \{\epsilon\}, (I \times M))$ is defined as
 
-Depending on the predicate, this class is divided into further sub-classes:
+$$
+F(k \in K, (ind, m) \in X) := 
+\begin{cases}
+	m & \text{if} P(k, ind) = 1 \\
+	\perp & \text{if} P(k, ind) = 0
+\end{cases}
+$$
 
-#### Identity-Based Encryption (IBE)
+Let's look at an example:
 
-The predicate is a simple equality test. The index `ind` is an identity (e.g., an email address), and a key works only if it was generated for that exact identity. **Anonymous IBE** is a variant where the index is kept private.
+Suppose we have ind = “Alice” and some message m. Let us assume that our predicate key is “Is the sender = “Alice”?”.
+
+In this case, we will get the decrypted message as m. But, if ind = “Bob”, we would learn nothing about m.
+
+A variation to this is predicate encryption with public index, where instead of keeping the index secret, we reveal it to the user as a publicly known value. In fact, it is explicitly sent with the ciphertext. 
+
+$$ F(\epsilon, (ind, m)) = (ind, len(m)) $$
+
+One question you might have here is, “Why should index be publicly known? Isn't it a security risk?”
+
+The reason for revealing the index is done as a trade-off. Hidden index value can often lead to heavy cryptographic operations and can be computationally expensive. This is unnecessary in case of operations like sorting, searching, etc., where the goal is to perform these operations on encrypted data and not necessarily focused on finding the right index value.
+
+It's also important to note here that although the index value is leaked, it isn't possible to decrypt data using this information. The only thing we learn is, for example, the identity of the sender, nothing more. 
+
+Depending on the type of predicate, we can further divide this into distinct sub-classes. Let’s examine each in detail.
+
+#### Identity Based Encryption 
+
+Here, the predicate is an equality test to verify the identity of the ciphertext.
+
+For key space $K := \{0, 1\}* \cup \{\epsilon\}$ and plaintext pair (ind, m), where index space $I := \{0,1}*, the predicate P on $K \times I$ is defined as
+$$
+P(k \in K \backslash \{\epsilon\}, ind \in I) := 
+\begin{cases}
+	1 & \text{if} k = ind and \\
+	2 & \text{otherwise}
+\end{cases}
+$$
+
+We exclude $\epsilon$ here because it doesn't make sense to have the index as$\epsilon$.
+
+Let’s take an example to understand this better. 
+
+Assume ind = “Alice” for a given message m and together they make the plaintext = (“Alice”, m). The sender, Bob, encrypts the plaintext using pp and sends the ciphertext to Alice. Alice authenticates herself by generating a secret key sk = keygen(msk, “Alice”) using the private key generator (PKG). While decrypting, Alice provides her secret key along with the ciphertext. At this moment, Alice’s identity is verified to make sure that she is the rightful receiver of the message and the decrypted message is outputted. 
+
+#### Anonymous Identity Based Encryption
+
+It is an identity based encryption, except that here, the index is kept private. Hence, the only thing leaked is the length of the message. 
+
+$$F(\epsilon, (ind, m)) = len(m)$$
 
 #### Attribute-Based Encryption (ABE)
 
