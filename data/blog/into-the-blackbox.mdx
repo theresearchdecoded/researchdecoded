@@ -6,51 +6,61 @@ draft: false
 summary: "A deep dive into functional encryption through the black box lens, explaining how it enables secure computations on encrypted data."
 ---
 
-Functional encryption can often feel like stepping into a dense forest of symbols, equations, and abstract definitions. When I first started reading the paper, “Functional Encryption: Definitions and Challenges” by Dan Boneh, Amit Sahai, and Brent Waters, I felt it was written in a language just beyond my reach. If you've ever felt that way, this post is for you.
+Functional encryption can often feel like stepping into a dense forest of symbols, equations and abstract definitions. When I first started going through the paper, “Functional Encryption: Definitions and Challenges” by Dan Boneh, Amit Sahai and Brent Waters, I felt like it was in a language that was just beyond my reach. If you have ever felt that way, this post is for you. 
 
-This blog is a guided tour where we'll walk through the paper together, unpacking the notation, highlighting the big ideas, and delving deeper where things get tricky. Whether you're new to functional encryption or just need a refresher, you're in the right place.
-
+This blog is a guided tour where we will walk through the paper together, unpacking the notations, highlighting the big ideas and delving deeper where things get tricky. Whether you are new to functional encryption or just need a quick refresher, you are in the right place. 
 Let’s get started!
 
-## Introduction to Formal Language and Syntax
+## Introduction into the Formal Language and Syntax Used
+In the last post, we covered the basics of Functional Encryption. If you are new, start [here](./functional-encryption-101).
 
-In the last post, we covered the basics of Functional Encryption. If you’re new, [start there first](./path-to-your-previous-post).
-
-Section 1 of the paper outlines the history and motivation, which I recommend skimming for context. Here, we’ll dive into the formal language, breaking down the notation and definitions to make them easier to follow.
+Section 1 of the paper outlines the history and motivation, which I recommend skimming for context. Here, we’ll dive into the formal language and syntax, breaking down the notation and definitions to make them easier to follow.
 
 A functional encryption scheme is governed by four core algorithms:
 
-1.  **Setup**: Generates the public key (public parameters, `pp`) and the master key (`mk`). The public key is available to everyone, while the master key is kept secret by the trusted party.
-2.  **KeyGen (Key Generation)**: Uses the master key to generate a secret key (`sk`) tied to a particular function. This is the magic of FE—it allows a user to extract the result of a specific function on the data without decrypting the data itself.
-3.  **Enc (Encryption)**: Encrypts the data with the public parameters (`pp`) to produce a ciphertext.
-4.  **Dec (Decryption)**: Uses a secret key (`sk`) on the ciphertext to produce the function's output (`y`).
+1. **Setup**: It generates the public key (aka public parameters, pp) and the master key (mk). As we know, the public parameters are available to everyone, while the master key is kept secret by the trusted party.
+2. **KeyGen (Key Generation)**: It uses the master key to generate the secret key (sk) tied to a particular function. This is the reason functional encryption works, i.e. being able to exact only a function of the data without decrypting the data itself.
+3. **Enc (Encryption)**: It encrypts the data with the public parameters, to produce the ciphertext.
+4. **Dec (Decryption)**: It uses the secret key on the ciphertext to produce the function of the data (y).
 
-### Decoding the Jargon
+These are some of the terms often used in the definitions:
 
-Here are a few key terms used in the formal definitions:
+1. **Key Space (K)**: It is the set of all valid keys for a particular scheme.
+2. **Plaintext Space (X)**: It is the set of all valid plaintext values for a particular scheme.
+3. **Security parameter (λ)**: It controls how hard the scheme is to break. It is usually denoted by 1<sup>λ</sup>, which basically means the maximum length is 1<sup>λ</sup>. This is done to avoid the confusion that λ itself is the maximum length.
+4. **Deterministic Turing Machine**: It is a theoretical computational model that is predictable. When given a particular input, it will always produce the same output in the same number of steps. When a scheme is represented by a deterministic Turing machine, it is said to be precise and well-defined. We won’t be covering Turing machines here as it is a vast topic that would need its own post.
+5. **Probabilistic Polynomial Time (PPT) Algorithm**: This means the algorithms are both efficient and secure. Probabilistic means that they use randomness to make decisions. For example, flipping a coin to make a decision. Polynomial time means that even if the input size increases, the algorithm will still be able to complete in a reasonable amount of time (not infinitely running).
+6. **Empty key (&epsilon;)**: It is a special non-existent key, used to denote analyse what information about the plaintext the ciphertext leaks.
+ 
+Now that we have a basic grasp of the language and notation, let’s dive into the key ideas introduced in the paper.
 
-1.  **Key Space (`K`)**: The set of all valid keys for a scheme.
-2.  **Plaintext Space (`X`)**: The set of all valid plaintext values.
-3.  **Security Parameter (`λ`)**: A parameter that controls how hard the scheme is to break. It's often written as `$1^\lambda$` in academic papers, a formal way to ensure the system's security and runtime scale properly.
-4.  **Deterministic Turing Machine**: A theoretical computational model that is predictable—a given input always produces the same output. Stating that a function is a Turing machine is a formal way of saying it's a well-defined computation.
-5.  **Probabilistic Polynomial Time (PPT) Algorithm**: This means the algorithms are both efficient and secure. "Probabilistic" means they use randomness (essential for security), and "Polynomial Time" means they run in a reasonable amount of time.
-6.  **Empty Key (`ε`)**: A special non-existent key, often used to analyze what information the ciphertext leaks by itself.
+## Formal Definitions
 
-### Formal Definitions
+### Definition 1:
 
-> **Definition 1: Functionality**
-> A functionality `F` defined over `(K, X)` is a function `$F : K \times X \to \{0, 1\}^*$` described as a (deterministic) Turing Machine. The set `K` is the key space and `X` is the plaintext space. We require that `K` contain a special key called the empty key, denoted `ε`.
+A functionality F defined over (K, X) is a function $F : K \times X \to \{0, 1\}$ described as a (deterministic) Turing Machine. The set K is called the key space and the set X is called the plaintext space. We require that the key space K contain a special key called the empty key denoted &epsilon;.
 
-> **Definition 2: Functional Encryption Scheme**
-> An FE scheme for a functionality `F` is a tuple of four PPT algorithms `(Setup, KeyGen, Enc, Dec)` satisfying the following correctness condition for all `$k \in K$` and `$x \in X$`:
-> 1.  `(pp, mk)` $\leftarrow$ `Setup(`$1^\lambda$`)`
-> 2.  `sk` $\leftarrow$ `KeyGen(mk, k)`
-> 3.  `c` $\leftarrow$ `Enc(pp, x)`
-> 4.  `y` $\leftarrow$ `Dec(sk, c)`
->
-> We require that `y = F(k, x)` with probability 1.
+### Definition 2:
 
-The last part of this section discusses **parameterization**. While we've treated `K` and `X` as fixed, they often depend on the `Setup` algorithm. For example, in RSA, `Setup` returns a modulus `N`, and the keys and plaintexts are defined over `$Z_N$`. So, `Setup` doesn't just create keys; it also defines the environment they operate in.
+A functional encryption scheme (FE) for a functionality F defined over (K, X) is a tuple of four PPT algorithms (setup, keygen, enc, dec) satisfying the following correctness condition for all k &isin; K and x &isin; X:
+1. **Generate a public and master secret key pair:** (pp, mk) $\leftarrow$ setup(1<sup>λ</sup>) 
+2. **Generate secret key for k:** sk $\leftarrow$ keygen(mk, k) 
+3. **Encrypt message x:** c $\leftarrow$ enc(pp, x) 
+4. **Use sk to compute F(k, x) from c:** y $\leftarrow$ dec(sk, c) 
+then we require that y = F(k, x) with probability 1.
+
+If we now apply this to public key encryption (which we discussed in the last blog), 
+Let K := {1, &epsilon;} and consider the following functionality F defined over (K, X) for some plaintext space X: 
+$$
+F(k,x) :=
+\begin{cases}
+  x, & \text{if } k = 1 \\
+  \text{len}(x), & \text{if } k = \epsilon
+\end{cases}
+$$
+
+As we know, there is no logic of functions in the general public key encryption scheme. So, we are just considering two cases, k = 1 when the message gets decrypted and k = &epsilon;, where only length of the decrypted message is revealed, nothing more. 
+The last part in this section speaks about parameterisation. While we treated K and X as fixed spaces, they often depend on additional information from the Setup algorithm. For example, in RSA, Setup returns a modulus N, and the keys and plaintexts are defined over $Z_N$ (Note: $Z_N$ means a set of all integers that can be produced by modulo N). So, Setup doesn't just create keys. It also defines the environment they operate in.
 
 ## Classes of Functional Encryption
 
