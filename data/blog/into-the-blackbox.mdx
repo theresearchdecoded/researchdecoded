@@ -215,3 +215,69 @@ $$ P_n\left( (v_1, \dots, v_n) \in K \backslash \{\epsilon\}, \text{ind} = (w_1,
 Since ind is hidden here, only the length of the message is revealed. 
 
 Hidden vector encryption enables fine-grained searches, such as conjunctive queries and range queries, without revealing the underlying attribute values.
+
+#### Inner Product Predicate
+
+To understand inner product predicate, we first need to understand what ring and field means and how they are different, and to understand that, we need to understand additive and multiplicative inverse. So, let’s start from that.
+
+Additive inverse in cryptography is almost the same as what it means in math, but with a small twist. 
+
+Remember we learnt the idea of Zn while defining the definition of functional encryption. We will bring that back here. So, anytime we want to calculate the additive inverse of any number, we say we want the additive inverse of that number in Zn. It would be easier to explain this with an example. 
+
+Let’s consider Z5. Z5 contains possible results of mod 5, which means
+					Z5 = {0, 1, 2, 3, 4}
+
+Suppose, we have to find the additive inverse of 1. According to the definition, I need to find the value, which when added to 1 gives 0, which is -1 in math. However, there is one small issue: Subtraction and division are invalid operations in cryptography, which means negative numbers are out of the question. But, lucky for us, mod comes to save the day.
+
+In cryptography, we modify the definition of additive inverse as:
+					(x + y) mod 5 = 0
+
+Using this new definition, the additive inverse of 1 over Zn becomes 4 as (1+4) mod 5 = 0.
+
+Similarly, the new definition of multiplicative inverse becomes:
+					(x . y) mod 5 = 1
+
+But, one issue with multiplicative inverse is that not all integers in Zn may have a multiplicative inverse.
+
+Let’s consider Z8. 
+					Z8 = {0, 1, 2, 3, 4, 5, 6, 7}
+
+Here, 2 doesn’t have a multiplicative inverse as product mod 8 never gives 1.
+
+With this information, we can now define a ring and a field. Ring means that the additive and multiplicative inverse may not be in Zn. Field means that the additive and multiplicative inverse must be in Zn.
+
+Initially the inner product predicate was defined over a ring Zn. But, given that additive and multiplicative inverses may or may not exist, it complicates proofs. Hence, we define it over a Fp, where p is a prime number (mod prime is always a field). 
+
+The idea of inner product predicate is simple. We set up a dot product expression to evaluate any function we need to compute. This allows us to perform complex evaluations like disjunction, CNF (Conjunctive Normal Form), DNF (Disjunctive Normal Form), polynomial, etc. Both the key and the index here are vectors and access is granted if their dot product gives the result as 0. 
+
+The scheme is written as:
+
+1. The setup algorithm defines a randomly chosen prime $p$ of length $\kappa$, where $\kappa$ is the security parameter.
+
+2. The key space $K$ is all $\vec{v} = (v_1, \dots, v_n)$ where each $v_i \in \mathbb{F}_p$.
+
+3. The plaintext is a pair $(\text{ind} = (w_1, \dots, w_n), m)$ where each $w_i \in \mathbb{F}_p$. The index space is $I := (\mathbb{F}_p)^n$.
+
+4. The predicate $P_{n,p}$ on $K \times I$ is defined as
+    $$
+    P_{n,p}\left( (v_1, \dots, v_n) \in K \backslash \{\epsilon\}, \text{ind} = (w_1, \dots, w_n) \right) :=
+    \begin{cases}
+    	1 & \text{if } \sum_{i=1}^{n} v_i \cdot w_i = 0 \\
+    	0 & \text{otherwise}
+    \end{cases}
+    $$
+
+### Other systems
+By using a combination of systems, we can make new systems. Some examples are:
+1. Attribute-Based Encryption and Broadcast Encryption 
+2. Identity-Based Broadcast Encryption 
+3. Broadcast HIBE
+4. Inner-Product Encryption and ABE
+
+##Conclusion
+
+Through this blog, we moved beyond the simple “dot product” view and uncovered the bigger picture of functional encryption and its subclasses. What began as a small, simple idea has now taken shape into a clear, well-defined concept.
+
+If this post felt heavier or denser than the last one, that’s completely natural - you are encountering a lot of notation and theory for the first time. But I hope that as we went along, the pieces started clicking into place and felt easier to grasp.
+
+And remember, this isn’t the finish line. The real question still lingers: are these encryption schemes truly secure? That’s the mystery we’ll unravel next - in our deep dive into security definitions.
