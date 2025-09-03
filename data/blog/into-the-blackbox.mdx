@@ -188,6 +188,7 @@ There are 2 types:
    Note that the boolean formula is a monotone, meaning that only AND and OR are allowed. NOT is not allowed.
 
 2. **Ciphertext-Policy ABE:**
+   
    This is just the reverse of Key-Policy ABE. Here, the index is the boolean function, i.e., $\text{ind} = \phi$, and the key carries the vector $z$. Everything else is exactly the same.
 
    We can describe this system for the predicate $P_n: K \times I \to \{0,1\}$, where:
@@ -202,3 +203,15 @@ There are 2 types:
       0 & \text{otherwise}
     \end{cases}
     $$
+
+#### Hidden Vector Encryption
+
+Here, the key essentially checks if the index follows a particular pattern and that becomes the basis for granting access. For the plaintext pair, we have the index represented as a vector and the message itself, i.e. plaintext = (ind = (w_1, w_2, …, w_n), m). The key resembles a regex-like format to pattern match the index. If the pattern matches, access is granted. This gives more flexibility in how the index should look and makes writing the rule a lot easier.
+
+In this system, a ciphertext has a vector of $n$ elements in $\{0, 1\}^*$, and a private key consists of a vector of $n$ elements in $\{*\} \cup \{0, 1\}^*$, where `*` is a wildcard character. The key space is $K = (v_1, \dots, v_n)$, where each $v_i \in \{*\} \cup \{0, 1\}^*$. The plaintext is a pair $(\text{ind} = (w_1, \dots, w_n), m)$, where each $w_i \in \{0, 1\}^*$ and the index space is $I := (\{0, 1\}^*)^n$.Then, the predicate $P_n on K \times I$ is defined as
+
+$$ P_n\left( (v_1, \dots, v_n) \in K \backslash \{\epsilon\}, \text{ind} = (w_1, \dots, w_n) \right) := \begin{cases} 	1 & \text{if } v_i = w_i \text{ whenever } v_i \neq * \\ 	0 & \text{otherwise} \end{cases} $$
+
+Since ind is hidden here, only the length of the message is revealed. 
+
+Hidden vector encryption enables fine-grained searches, such as conjunctive queries and range queries, without revealing the underlying attribute values.
