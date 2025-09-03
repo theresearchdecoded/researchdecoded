@@ -30,7 +30,7 @@ These are some of the terms often used in the definitions:
 3. **Security parameter (λ)**: It controls how hard the scheme is to break. It is usually denoted by 1<sup>λ</sup>, which basically means the maximum length is 1<sup>λ</sup>. This is done to avoid the confusion that λ itself is the maximum length.
 4. **Deterministic Turing Machine**: It is a theoretical computational model that is predictable. When given a particular input, it will always produce the same output in the same number of steps. When a scheme is represented by a deterministic Turing machine, it is said to be precise and well-defined. We won’t be covering Turing machines here as it is a vast topic that would need its own post.
 5. **Probabilistic Polynomial Time (PPT) Algorithm**: This means the algorithms are both efficient and secure. Probabilistic means that they use randomness to make decisions. For example, flipping a coin to make a decision. Polynomial time means that even if the input size increases, the algorithm will still be able to complete in a reasonable amount of time (not infinitely running).
-6. **Empty key (&epsilon;)**: It is a special non-existent key, used to denote analyse what information about the plaintext the ciphertext leaks.
+6. **Empty key ($\epsilon$)**: It is a special non-existent key, used to denote analyse what information about the plaintext the ciphertext leaks.
  
 Now that we have a basic grasp of the language and notation, let’s dive into the key ideas introduced in the paper.
 
@@ -38,7 +38,7 @@ Now that we have a basic grasp of the language and notation, let’s dive into t
 
 ### Definition 1:
 
-A functionality F defined over (K, X) is a function $F : K \times X \to \{0, 1\}$ described as a (deterministic) Turing Machine. The set K is called the key space and the set X is called the plaintext space. We require that the key space K contain a special key called the empty key denoted &epsilon;.
+A functionality F defined over (K, X) is a function $F : K \times X \to \{0, 1\}$ described as a (deterministic) Turing Machine. The set K is called the key space and the set X is called the plaintext space. We require that the key space K contain a special key called the empty key denoted $\epsilon$.
 
 ### Definition 2:
 
@@ -50,7 +50,7 @@ A functional encryption scheme (FE) for a functionality F defined over (K, X) is
 then we require that y = F(k, x) with probability 1.
 
 If we now apply this to public key encryption (which we discussed in the last blog), 
-Let K := {1, &epsilon;} and consider the following functionality F defined over (K, X) for some plaintext space X: 
+Let K := {1, $\epsilon$} and consider the following functionality F defined over (K, X) for some plaintext space X: 
 $$
 F(k,x) :=
 \begin{cases}
@@ -59,7 +59,7 @@ F(k,x) :=
 \end{cases}
 $$
 
-As we know, there is no logic of functions in the general public key encryption scheme. So, we are just considering two cases, k = 1 when the message gets decrypted and k = &epsilon;, where only length of the decrypted message is revealed, nothing more. 
+As we know, there is no logic of functions in the general public key encryption scheme. So, we are just considering two cases, k = 1 when the message gets decrypted and k = $\epsilon$, where only length of the decrypted message is revealed, nothing more. 
 The last part in this section speaks about parameterisation. While we treated K and X as fixed spaces, they often depend on additional information from the Setup algorithm. For example, in RSA, Setup returns a modulus N, and the keys and plaintexts are defined over $Z_N$ (Note: $Z_N$ means a set of all integers that can be produced by modulo N). So, Setup doesn't just create keys. It also defines the environment they operate in.
 
 ## Classes of Functional Encryption
