@@ -169,19 +169,18 @@ Now, one question you might have here is if the index is publicly known and if t
 
 Here is a slight subtlety that is important to understand. The receiver doesn’t get the encrypted data and hence the value of the index until they generate the secret key from the PKG. And the receiver can only generate the secret key once. Now the scheme is secure, isn’t it?
 
-We can describe this system for the predicate $P_n: K \times I \rightarrow \{0,1\} where:
+We can describe this system for the predicate $P_n: K \times I \to \{0,1\}$, where:
 
-1. The key space K is the set of all poly-sized boolean formulas \phi in n variables $z = (z_1, …, z_n) \in {0, 1}^n. Let \phi(z) be the formula \phi at z.
-2. The plaintext, (ind = z, m), where $I := {0, 1}^n$ and z is a bit vector representing boolean values a_2, …, z_n.
-3. The predicate $P_n on K \times I$ is defined as
-
-$$
-P_n(\phi \in K \backslash \{\epsilon\}, ind = z \in I) := 
-\begin(cases)
-	1 & \text{if } \phi(z) = 1
-	0 & \text{otherwise}
-\end(cases)
-$$
+1.  The key space $K$ is the set of all poly-sized boolean formulas $\phi$ in $n$ variables $z = (z_1, \dots, z_n) \in \{0, 1\}^n$. Let $\phi(z)$ be the evaluation of the formula $\phi$ at input $z$.
+2.  The plaintext is a pair $(\text{ind} = z, m)$, where the index space is $I := \{0, 1\}^n$ and $z$ is a bit vector $(z_1, \dots, z_n)$.
+3.  The predicate $P_n$ on $K \times I$ is defined as:
+    $$
+    P_n(\phi \in K, \text{ind} = z \in I) :=
+    \begin{cases}
+    	1 & \text{if } \phi(z) = 1 \\
+    	0 & \text{otherwise}
+    \end{cases}
+    $$
 
 The same can also be applied using strings instead of bit vectors. 
 
