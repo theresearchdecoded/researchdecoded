@@ -247,7 +247,7 @@ Suppose, we have to find the additive inverse of 1. According to the definition,
 In cryptography, we modify the definition of additive inverse as:
 
 $$
-(x + y) mod 5 = 0
+(x + y) \bmod 5 = 0
 $$
 
 Using this new definition, the additive inverse of 1 over $Z_n$ becomes 4 as (1+4) mod 5 = 0.
@@ -255,14 +255,16 @@ Using this new definition, the additive inverse of 1 over $Z_n$ becomes 4 as (1+
 Similarly, the new definition of multiplicative inverse becomes:
 
 $$
-(x \dot y) mod 5 = 1
+(x \cdot y) \bmod 5 = 1
 $$
 
 But, one issue with multiplicative inverse is that not all integers in $Z_n$ may have a multiplicative inverse.
 
 Let’s consider $Z_8$. 
 
-$Z_8$ = {0, 1, 2, 3, 4, 5, 6, 7}
+$$
+Z_8 = \{0,1,2,3,4,5,6,7\}
+$$
 
 Here, 2 doesn’t have a multiplicative inverse as product mod 8 never gives 1.
 
